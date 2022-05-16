@@ -1,0 +1,7 @@
+default_pulling_interval: 2
+token: "5Vv4FFR0fBT1ho3qooYx05ixbjOMaaC9qZy8pO2p"
+platform_host_url: "http://localhost:8080"
+plugins:
+  - type: bigquery_storage
+    name: bigquery_storage
+    project: opendatadiscovery

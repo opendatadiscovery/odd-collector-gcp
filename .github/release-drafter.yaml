@@ -1,0 +1,53 @@
+name-template: 'v$RESOLVED_VERSION'
+tag-template: '$RESOLVED_VERSION'
+template: |
+  ## Changes
+  $CHANGES
+  ## Contributors
+  $CONTRIBUTORS
+
+exclude-labels:
+  - 'skip-changelog'
+categories:
+  - title: '🚀 Features'
+    labels:
+      - 'kind: feature'
+      - 'kind: enhancement'
+  - title: '🐛 Bug Fixes'
+    labels:
+      - 'kind: bug'
+  - title: '🧰 Maintenance'
+    labels:
+      - 'kind: chore'
+      - 'kind: documentation'
+      - 'kind: maintenance'
+change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
+version-resolver:
+  major:
+    labels:
+      - 'major'
+  minor:
+    labels:
+      - 'minor'
+  patch:
+    labels:
+      - 'patch'
+  default: patch
+autolabeler:
+  - label: 'kind: chore'
+    files:
+      - '*.md'
+    branch:
+      - '/docs{0,1}\/.+/'
+      - '/gh-pages\/.+/'
+  - label: 'kind: bug'
+    branch:
+      - '/fix\/.+/'
+      - 'issues\/.+/'
+    title:
+      - '/fix/i'
+      - 'issues/i'
+  - label: 'kind: feature'
+    branch:
+      - '/feature\/.+/'
+      - '/new\/.+/'
