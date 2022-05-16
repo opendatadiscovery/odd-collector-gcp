@@ -11,6 +11,8 @@ from odd_models.models import (
     DataSetField,
     DataSetFieldType,
     Type,
+    DataSetFieldStat,
+    StringFieldStat,
 )
 
 from odd_collector_gcp.adapters.bigquery_storage.dto import BigQueryDataset
@@ -90,19 +92,28 @@ class BigQueryStorageMapper:
         return [self.map_simple_field(field)]
 
     def map_simple_field(
-        self, field: SchemaField, parent_oddrn: str = None
+        self, field_schema: SchemaField, parent_oddrn: str = None
     ) -> DataSetField:
-        return DataSetField(
-            oddrn=self.__oddrn_generator.get_oddrn_by_path("columns", field.name),
-            name=field.name,
-            description=field.description,
+        field = DataSetField(
+            oddrn=self.__oddrn_generator.get_oddrn_by_path(
+                "columns", field_schema.name
+            ),
+            name=field_schema.name,
+            description=field_schema.description,
             parent_field_oddrn=parent_oddrn,
             metadata=[],
             type=DataSetFieldType(
                 type=_BIG_QUERY_STORAGE_TYPE_MAPPING.get(
-                    field.field_type.lower(), Type.TYPE_UNKNOWN
+                    field_schema.field_type.lower(), Type.TYPE_UNKNOWN
                 ),
-                logical_type=field.field_type,
-                is_nullable=field.is_nullable,
+                logical_type=field_schema.field_type,
+                is_nullable=field_schema.is_nullable,
             ),
         )
+
+        if field.type.type == Type.TYPE_STRING:
+            field_schema.stats = DataSetFieldStat(
+                string_stats=StringFieldStat(max_length=field_schema.max_length)
+            )
+
+        return field
