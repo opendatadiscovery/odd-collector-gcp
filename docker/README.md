@@ -42,7 +42,7 @@ Open http://localhost:8080/ in your browser. You should be able to see an an emp
 
 ### Configure and run the Collector
 
-1. Paste the token obtained in the previous step into the `docker/config/collector_config.yaml` file under the `token` entry
+1. Paste the token obtained in the previous step into the `docker/config/collector_config.yaml` file under the `token` entry. Replace `<YOUR_PROJECT>` with the ID of your GCP project.
 2. Create a GCP API key using [this](https://cloud.google.com/docs/authentication/getting-started) documentation. Save this key to a file `docker/config/key.json`
 3. Run **from the project root folder** `docker-compose -f docker/demo.yaml up -d odd-collector-gcp`.
 

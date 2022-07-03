@@ -22,7 +22,7 @@ services:
       - 8080:8080
 
   odd-collector-gcp:
-    image: odd-collector-gcp:0.1.0
+    image: ghcr.io/opendatadiscovery/odd-collector-gcp:latest
     restart: always
     volumes:
       - ./config/collector_config.yaml:/app/collector_config.yaml
