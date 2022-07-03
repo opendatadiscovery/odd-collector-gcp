@@ -1,4 +1,4 @@
-**# Open Data Discovery GCP Collector local demo environment
+# Open Data Discovery GCP Collector local demo environment
 * * *
 
 The following is a set of instructions to run ODD GCP Collector locally using docker and docker-compose. 
