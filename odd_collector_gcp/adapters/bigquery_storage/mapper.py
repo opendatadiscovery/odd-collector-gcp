@@ -80,6 +80,9 @@ class BigQueryStorageMapper:
         )
 
     def map_schema(self, schema: SchemaField) -> List[DataSetField]:
+        if isinstance(schema, list):
+            return reduce(iconcat, [self.map_field(f) for f in schema], [])
+
         return reduce(iconcat, [self.map_field(f) for f in schema.fields], [])
 
     def map_field(self, field: SchemaField) -> List[DataSetField]:
@@ -110,10 +113,5 @@ class BigQueryStorageMapper:
                 is_nullable=field_schema.is_nullable,
             ),
         )
-
-        if field.type.type == Type.TYPE_STRING:
-            field_schema.stats = DataSetFieldStat(
-                string_stats=StringFieldStat(max_length=field_schema.max_length)
-            )
 
         return field
