@@ -14,7 +14,11 @@ from odd_models.models import (
 )
 from oddrn_generator import BigTableGenerator
 
-from odd_collector_gcp.adapters.bigtable.models import BigTableInstance, BigTableTable, BigTableColumn
+from odd_collector_gcp.adapters.bigtable.models import (
+    BigTableInstance,
+    BigTableTable,
+    BigTableColumn,
+)
 
 
 TYPE_MAPPING = {
@@ -28,7 +32,7 @@ TYPE_MAPPING = {
     bytes: Type.TYPE_BINARY,
     list: Type.TYPE_LIST,
     tuple: Type.TYPE_UNION,
-    datetime.timedelta: Type.TYPE_DURATION
+    datetime.timedelta: Type.TYPE_DURATION,
 }
 
 
@@ -59,25 +63,24 @@ class BigTableMapper:
             name=table.table_id,
             metadata=[],
             type=DataEntityType.TABLE,
-            dataset=DataSet(
-                field_list=self.map_columns(table.columns)
-            ),
+            dataset=DataSet(field_list=self.map_columns(table.columns)),
         )
 
     def map_columns(
-        self, columns: List[BigTableColumn],
+        self,
+        columns: List[BigTableColumn],
     ) -> List[DataSetField]:
         fields = []
         for column in columns:
             field = DataSetField(
-                oddrn=self.__oddrn_generator.get_oddrn_by_path(
-                    "columns", column.name
-                ),
+                oddrn=self.__oddrn_generator.get_oddrn_by_path("columns", column.name),
                 name=column.name,
                 metadata=[],
                 type=DataSetFieldType(
-                    type=TYPE_MAPPING.get(type(column.value.decode()), Type.TYPE_UNKNOWN),
-                    logical_type='bytearray',
+                    type=TYPE_MAPPING.get(
+                        type(column.value.decode()), Type.TYPE_UNKNOWN
+                    ),
+                    logical_type="bytearray",
                     is_nullable=True,
                 ),
             )

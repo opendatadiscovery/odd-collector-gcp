@@ -6,14 +6,20 @@ from google.cloud import bigtable
 from oddrn_generator import BigTableGenerator
 
 from odd_collector_gcp.adapters.bigtable.mapper import BigTableMapper
-from odd_collector_gcp.adapters.bigtable.models import BigTableInstance, BigTableTable, BigTableColumn
+from odd_collector_gcp.adapters.bigtable.models import (
+    BigTableInstance,
+    BigTableTable,
+    BigTableColumn,
+)
 from odd_collector_gcp.domain.plugin import BigTablePlugin
 
 
 class Adapter(AbstractAdapter):
     def __init__(self, config: BigTablePlugin):
         self.__client = bigtable.Client(project=config.project, admin=True)
-        self.__generator = BigTableGenerator(google_cloud_settings={'project': config.project})
+        self.__generator = BigTableGenerator(
+            google_cloud_settings={"project": config.project}
+        )
         self.__mapper = BigTableMapper(oddrn_generator=self.__generator)
 
     def get_data_source_oddrn(self) -> str:
@@ -37,13 +43,10 @@ class Adapter(AbstractAdapter):
                     merged_columns = merged_columns | row.to_dict()
                 for col_name, col_val in merged_columns.items():
                     col_val = col_val[0].value if any(col_val) else None
-                    columns.append(BigTableColumn(name=col_name.decode(), value=col_val))
-                tables.append(
-                    BigTableTable(
-                        table_id=table.table_id,
-                        columns=columns
+                    columns.append(
+                        BigTableColumn(name=col_name.decode(), value=col_val)
                     )
-                )
+                tables.append(BigTableTable(table_id=table.table_id, columns=columns))
             instances.append(
                 BigTableInstance(
                     instance_id=instance.instance_id,
