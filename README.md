@@ -29,6 +29,37 @@ project: <any_project_name>
 rows_limit: 10 # get combination of all types in table used across the first N rows.
 ```
 
+### __GoogleCloudStorage__
+```yaml
+type: gcs
+name: gcs_adapter
+filename_filter: # Optional. Default filter allows each file to be ingested to platform.
+  include: [ '.*.parquet' ]
+  exclude: [ 'dev_.*' ]
+datasets:
+  # Recursive fetch for all objects in the bucket.
+  - bucket: my_bucket
+  # Explicitly specify the prefix to file.
+  - bucket: my_bucket
+    prefix: folder/subfolder/file.csv
+  # When we want to use the folder as a dataset. Very useful for partitioned datasets.
+  # I.e it can be Hive partitioned dataset with structure like this:
+  # s3://my_bucket/partitioned_data/year=2019/month=01/...
+  - bucket: my_bucket
+    prefix: partitioned_data/
+    folder_as_dataset:
+      file_format: parquet
+      flavor: hive
+
+  #field_names must be provided if partition flavor was not used. I.e for structure like this:
+  # s3://my_bucket/partitioned_data/year/...
+  - bucket: my_bucket
+    prefix: partitioned_data/
+    folder_as_dataset:
+      file_format: csv
+      field_names: ['year']
+```
+
 ## How to build
 ```bash
 docker build .
