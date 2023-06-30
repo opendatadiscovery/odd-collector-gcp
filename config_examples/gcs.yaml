@@ -1,0 +1,9 @@
+default_pulling_interval: 10
+token: ""
+platform_host_url: "http://localhost:8080"
+plugins:
+  - type: gcs
+    name: gcs_adapter
+    project: "OpenDataDiscovery"
+    datasets:
+      - bucket: "odd-bucket-1"
