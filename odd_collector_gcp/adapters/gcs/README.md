@@ -33,30 +33,6 @@ For more info about variables have a look at .env file in docker directory.
 After docker-compose run successful, application is ready to accept connection on port :8080. 
 
 
-#### Config for Helm:
-```
-podSecurityContext:
-  fsGroup: 65534
-image:
-  pullPolicy: Always
-  repository: 436866023604.dkr.ecr.eu-central-1.amazonaws.com/odd-s3-adapter
-  tag: ci-655380
-nameOverride: odd-gcs-adapter
-labels:
-  adapter: odd-gcs-adapter
-config:
-  envFrom:
-  - configMapRef:
-      name: odd-gcs-adapter
-  env:
-  - name: DEMO_GREETING
-    value: "Hello from the environment"
-  - name: DEMO_FAREWELL
-    value: "Such a sweet sorrow"
-```
-More info about Helm config in https://github.com/opendatadiscovery/charts
-
-
 ## Requirements
 - Python 3.9+
 - google-cloud-storage 2.10.0+
