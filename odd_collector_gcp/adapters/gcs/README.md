@@ -1,6 +1,6 @@
-## ODD S3 adapter
+## ODD Google Cloud Storage adapter
 
-ODD S3 adapter is used for extracting datasets info and metadata from S3 and S3 compatible object storages(MinIO). This adapter is implemetation of pull model (see more https://github.com/opendatadiscovery/opendatadiscovery-specification/blob/main/specification/specification.md#discovery-models). By default application gather data from S3 every minute, put it inside local cache and then ready to give it away by /entities API.
+ODD GCS adapter is used for extracting datasets info and metadata from Google Cloud Storage. This adapter is an implementation of pull model (see more https://github.com/opendatadiscovery/opendatadiscovery-specification/blob/main/specification/specification.md#discovery-models). By default application gather data from GCS every minute, put it inside local cache and then ready to give it away by /entities API.
 
 This service based on Python Flask and Connexion frameworks with APScheduler.
 
@@ -13,10 +13,10 @@ Adapter uses apache arrow technology to obtain metadata.
 Currently supported dataset formats are parquet, csv(plain and gziped), tsv(plain and gziped)
 Please note:
 
-- dataset should contain files in same format, in case of format incompatibilities or currapted files 
-warning will be trown with message like 
+- dataset should contain files in same format, in case of format incompatibilities or corrupted files 
+warning will be thrown with message like 
 ```
-[2022-02-18 11:05:52,615] WARNING in s3_schema_retriever: unable to pars dataset in odd-s3-adapter/ with csv format
+[2022-02-18 11:05:52,615] WARNING in gcs_schema_retriever: unable to parse dataset in odd-gcs-adapter/ with csv format
 ```
 - Datasets with gziped files will take much longer to retrieve info because of compression 
 
@@ -27,14 +27,6 @@ For more information about data entities see https://github.com/opendatadiscover
 
 ## Quickstart
 Application is ready to run out of the box by the docker-compose (see more https://docs.docker.com/compose/).
-Strongly recommended to override next variables in docker-compose .env file:
-
-```
-AWS_REGION=
-AWS_ACCESS_KEY_ID=   
-AWS_SECRET_ACCESS_KEY=
-S3_PATHS=
-```
 
 For more info about variables have a look at .env file in docker directory.
 
@@ -49,13 +41,13 @@ image:
   pullPolicy: Always
   repository: 436866023604.dkr.ecr.eu-central-1.amazonaws.com/odd-s3-adapter
   tag: ci-655380
-nameOverride: odd-s3-adapter
+nameOverride: odd-gcs-adapter
 labels:
-  adapter: odd-s3-adapter
+  adapter: odd-gcs-adapter
 config:
   envFrom:
   - configMapRef:
-      name: odd-s3-adapter
+      name: odd-gcs-adapter
   env:
   - name: DEMO_GREETING
     value: "Hello from the environment"
@@ -66,5 +58,5 @@ More info about Helm config in https://github.com/opendatadiscovery/charts
 
 
 ## Requirements
-- Python 3.8
-- S3 13+
+- Python 3.9+
+- google-cloud-storage 2.10.0+

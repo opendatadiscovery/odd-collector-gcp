@@ -86,7 +86,6 @@ class FileSystem(PyarrowFs):
         @param file_name: file name
         @return: File
         """
-        # path = remove_protocol(path)
         if not file_name:
             file_name = path.split("/")[-1]
 
@@ -116,6 +115,5 @@ class FileSystem(PyarrowFs):
         @param recursive: Flag to recursively search nested objects
         @return: Folder class with objects and path
         """
-        # path = remove_protocol(path)
         objects = self.list_objects(path) if recursive else []
         return Folder(path, objects)

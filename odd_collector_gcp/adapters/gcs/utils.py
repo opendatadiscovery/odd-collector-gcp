@@ -14,7 +14,6 @@ def file_extension(file_name: str) -> str:
     @return: file extension, e.g. csv, parquet, etc.
     """
     try:
-        print(file_name)
         return re.search("\.(?P<ext>[a-z]+)", file_name).group("ext")
     except AttributeError:
         logger.error(f"Failed to get file extension for {file_name}")

@@ -1,7 +1,5 @@
-import logging
 import re
 from typing import Any, Dict
-
 from funcy import lflatten
 from lark import Lark
 from odd_models.models import (
@@ -15,6 +13,7 @@ from odd_models.models import (
 from oddrn_generator.generators import GCSGenerator
 from oddrn_generator.utils import escape
 from pyarrow import Schema
+from ..logger import logger
 
 from .gcs_field_type_transformer import GCSFieldTypeTransformer
 
@@ -73,8 +72,8 @@ def __parse(field_type: str) -> Dict[str, Any]:
         column_tree = parser.parse(field_type)
         return field_type_transformer.transform(column_tree)
     except Exception as exc:
-        logging.warning(f"Could not map field type: {field_type}")
-        logging.debug(exc, exc_info=True)
+        logger.warning(f"Could not map field type: {field_type}")
+        logger.debug(exc, exc_info=True)
         return {"type": "unknown", "logical_type": field_type}
 
 
