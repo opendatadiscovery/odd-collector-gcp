@@ -1,7 +1,9 @@
 default_pulling_interval: 10
-token: ""
+token: "ajXG6rf7bbEbsSCfDnyyI4WfFX9lAPR20JaFzUi9"
 platform_host_url: "http://localhost:8080"
 plugins:
-  - type: bigquery_storage
-    name: bigquery_storage
-    project: opendatadiscovery
+  - type: gcs
+    name: gcs_adapter
+    project: "OpenDataDiscovery"
+    datasets:
+      - bucket: "odd-bucket-1"
