@@ -1,8 +1,7 @@
-from typing import Literal, Union
+from typing import Literal, Optional
 
-import pydantic
 from odd_collector_sdk.domain.plugin import Plugin
-from typing_extensions import Annotated
+from odd_collector_sdk.types import PluginFactory
 
 
 class GcpPlugin(Plugin):
@@ -13,7 +12,12 @@ class BigQueryStoragePlugin(GcpPlugin):
     type: Literal["bigquery_storage"]
 
 
-AvailablePlugin = Annotated[
-    Union[BigQueryStoragePlugin],
-    pydantic.Field(discriminator="type"),
-]
+class BigTablePlugin(GcpPlugin):
+    type: Literal["bigtable"]
+    rows_limit: Optional[int] = 10
+
+
+PLUGIN_FACTORY: PluginFactory = {
+    "bigtable": BigTablePlugin,
+    "bigquery_storage": BigQueryStoragePlugin,
+}

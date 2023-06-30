@@ -1,16 +1,16 @@
-FROM python:3.9-slim-bullseye as base
-ENV POETRY_PATH=/opt/poetry \
-    POETRY_VERSION=1.1.6
+FROM python:3.9.16-slim-buster as base
+ENV POETRY_PATH=/etc/poetry \
+    POETRY_VERSION=1.3.2
 ENV PATH="$POETRY_PATH/bin:$VENV_PATH/bin:$PATH"
 
 FROM base AS build
 
 RUN apt-get update && \
     apt-get install -y -q build-essential \
+    python3-dev  \
     curl
 
-RUN curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
-RUN mv /root/.poetry $POETRY_PATH
+RUN curl -sSL https://install.python-poetry.org | POETRY_HOME=${POETRY_PATH} python3 -
 RUN poetry config virtualenvs.create false
 RUN poetry config experimental.new-installer false
 
