@@ -12,12 +12,21 @@ To learn more about collector types and ODD Platform's architecture, [read the d
 
 ## Implemented adapters
  - [BigQuery](#bigquery)
+ - [BigTable](#bigtable)
 
 ### __BigQuery__
 ```yaml
 type: bigquery_storage
 name: bigquery_storage
 project: <any_project_name>
+```
+
+### __BigTable__
+```yaml
+type: bigtable
+name: bigtable
+project: <any_project_name>
+rows_limit: 10 # get combination of all types in table used across the first N rows.
 ```
 
 ## How to build

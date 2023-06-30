@@ -1,6 +1,6 @@
 from typing import List
 
-from odd_collector_sdk.domain.adapter import AbstractAdapter
+from odd_collector_sdk.domain.adapter import BaseAdapter
 from odd_models.models import DataEntityList
 from google.cloud import bigtable
 from oddrn_generator import BigTableGenerator
@@ -14,32 +14,38 @@ from odd_collector_gcp.adapters.bigtable.models import (
 from odd_collector_gcp.domain.plugin import BigTablePlugin
 
 
-class Adapter(AbstractAdapter):
+class Adapter(BaseAdapter):
+    config: BigTablePlugin
+    generator: BigTableGenerator
+
     def __init__(self, config: BigTablePlugin):
-        self.__client = bigtable.Client(project=config.project, admin=True)
-        self.__generator = BigTableGenerator(
-            google_cloud_settings={"project": config.project}
-        )
-        self.__mapper = BigTableMapper(oddrn_generator=self.__generator)
+        super().__init__(config)
+
+    def create_generator(self) -> BigTableGenerator:
+        return BigTableGenerator(google_cloud_settings={"project": self.config.project})
 
     def get_data_source_oddrn(self) -> str:
-        return self.__generator.get_data_source_oddrn()
+        return self.generator.get_data_source_oddrn()
 
     def get_data_entity_list(self) -> DataEntityList:
-        entities = self.__mapper.map_instances(self.__get_instances())
+        mapper = BigTableMapper(oddrn_generator=self.generator)
+        entities = mapper.map_instances(self.__get_instances())
 
         return DataEntityList(
             data_source_oddrn=self.get_data_source_oddrn(), items=entities
         )
 
     def __get_instances(self) -> List[BigTableInstance]:
+        client = bigtable.Client(project=self.config.project, admin=True)
         instances = []
-        for instance in self.__client.list_instances()[0]:
+        # list_instances() -> (instances, failed_locations).
+        for instance in client.list_instances()[0]:
             tables = []
             for table in instance.list_tables():
                 merged_columns = {}
                 columns = []
-                for row in table.read_rows(limit=10):
+                # get combination of all types in table used across the first N rows.
+                for row in table.read_rows(limit=self.config.rows_limit):
                     merged_columns = merged_columns | row.to_dict()
                 for col_name, col_val in merged_columns.items():
                     col_val = col_val[0].value if any(col_val) else None

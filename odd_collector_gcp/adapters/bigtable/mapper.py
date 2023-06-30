@@ -1,8 +1,7 @@
 import datetime
-from functools import reduce
-from operator import iconcat
 from typing import List
 
+from funcy import lmapcat
 from odd_models.models import (
     DataEntity,
     DataEntityType,
@@ -41,7 +40,7 @@ class BigTableMapper:
         self.__oddrn_generator = oddrn_generator
 
     def map_instances(self, instances: List[BigTableInstance]) -> List[DataEntity]:
-        return reduce(iconcat, [self.map_instance(i) for i in instances], [])
+        return lmapcat(self.map_instance, instances)
 
     def map_instance(self, instance: BigTableInstance) -> List[DataEntity]:
         self.__oddrn_generator.set_oddrn_paths(instances=instance.instance_id)

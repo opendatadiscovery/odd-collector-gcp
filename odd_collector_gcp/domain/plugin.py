@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, Optional
 
 from odd_collector_sdk.domain.plugin import Plugin
 from odd_collector_sdk.types import PluginFactory
@@ -14,6 +14,7 @@ class BigQueryStoragePlugin(GcpPlugin):
 
 class BigTablePlugin(GcpPlugin):
     type: Literal["bigtable"]
+    rows_limit: Optional[int] = 10
 
 
 PLUGIN_FACTORY: PluginFactory = {
