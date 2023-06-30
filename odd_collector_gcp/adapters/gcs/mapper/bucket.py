@@ -38,7 +38,9 @@ def map_file(file: File, generator: GCSGenerator) -> DataEntity:
     return data_entity
 
 
-def map_folder(folder: Folder, generator: GCSGenerator) -> tuple[str, deque[DataEntity]]:
+def map_folder(
+    folder: Folder, generator: GCSGenerator
+) -> tuple[str, deque[DataEntity]]:
     bucket, *keys = folder.path.split("/")
     generator.set_oddrn_paths(keys="/".join(keys))
 

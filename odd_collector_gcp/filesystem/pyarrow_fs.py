@@ -27,7 +27,7 @@ class FileSystem:
         return self.fs.get_file_info(FileSelector(base_dir=path))
 
     def get_dataset(
-            self, path: str, format: str, partitioning_flavor=None, field_names=None
+        self, path: str, format: str, partitioning_flavor=None, field_names=None
     ) -> ds.Dataset:
         """
         Get dataset from file path.

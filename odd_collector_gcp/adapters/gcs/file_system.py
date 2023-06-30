@@ -1,10 +1,7 @@
 from typing import Union
-
 from odd_collector_gcp.domain.plugin import GCSPlugin
-
 from odd_collector_gcp.domain.dataset_config import DatasetConfig
 from ...filesystem.pyarrow_fs import FileSystem as PyarrowFs
-# from ...utils.remove_s3_protocol import remove_protocol
 from .domain.models import Bucket, File, Folder
 from .logger import logger
 from .utils import file_format

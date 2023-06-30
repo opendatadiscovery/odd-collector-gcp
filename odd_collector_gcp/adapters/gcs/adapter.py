@@ -1,5 +1,5 @@
 import traceback as tb
-from typing import Iterable, Union
+from typing import Iterable
 
 from odd_collector_sdk.domain.adapter import AbstractAdapter
 from odd_models.models import DataEntityList
@@ -12,7 +12,6 @@ from google.cloud import storage
 
 
 class Adapter(AbstractAdapter):
-
     def __init__(self, config: GCSPlugin) -> None:
         self.config = config
         self.__client = storage.Client(project=config.project)

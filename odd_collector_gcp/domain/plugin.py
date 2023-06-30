@@ -25,5 +25,5 @@ class GCSPlugin(GcpPlugin):
 
 PLUGIN_FACTORY: PluginFactory = {
     "bigquery_storage": BigQueryStoragePlugin,
-    "gcs": GCSPlugin
+    "gcs": GCSPlugin,
 }
