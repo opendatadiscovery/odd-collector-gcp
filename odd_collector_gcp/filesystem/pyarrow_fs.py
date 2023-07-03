@@ -12,11 +12,8 @@ class FileSystem:
     FileSystem hides pyarrow.fs implementation details.
     """
 
-    def __init__(self, config: GCSConfig):
-        # params = {"project": config.project}
-        params = {}
-
-        self.fs = GcsFileSystem(**params)
+    def __init__(self):
+        self.fs = GcsFileSystem()
 
     def get_file_info(self, path: str) -> list[FileInfo]:
         """
