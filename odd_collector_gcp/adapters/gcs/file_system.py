@@ -13,7 +13,7 @@ class FileSystem(PyarrowFs):
     """
 
     def __init__(self, config: GCSPlugin):
-        self.fs = PyarrowFs()
+        self.fs = PyarrowFs(config.parameters)
         self.filename_filter = config.filename_filter
 
     def get_folder_as_file(self, dataset_config: DatasetConfig) -> File:

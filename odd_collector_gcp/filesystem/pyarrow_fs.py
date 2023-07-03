@@ -1,7 +1,7 @@
 import pyarrow.dataset as ds
 from pyarrow._fs import FileInfo, FileSelector
 from pyarrow.fs import GcsFileSystem
-
+from odd_collector_gcp.adapters.gcs.domain.parameters import GCSAdapterParams
 from odd_collector_gcp.domain.plugin import GCSPlugin
 
 GCSConfig = GCSPlugin
@@ -12,8 +12,8 @@ class FileSystem:
     FileSystem hides pyarrow.fs implementation details.
     """
 
-    def __init__(self):
-        self.fs = GcsFileSystem()
+    def __init__(self, params: GCSAdapterParams):
+        self.fs = GcsFileSystem(**params.dict()) if params else GcsFileSystem()
 
     def get_file_info(self, path: str) -> list[FileInfo]:
         """

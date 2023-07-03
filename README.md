@@ -5,6 +5,10 @@ ODD Collector GCP is a lightweight service which gathers metadata from all your 
 
 To learn more about collector types and ODD Platform's architecture, [read the documentation](https://docs.opendatadiscovery.org/architecture).
 
+## Authentication
+By default, collector uses the process described in https://google.aip.dev/auth/4110 to resolve credentials.  
+If not running on Google Cloud Platform (GCP), this generally requires the environment variable GOOGLE_APPLICATION_CREDENTIALS to point to a JSON file containing credentials.
+
 ## Preview
  - [Implemented adapters](#implemented-adapters)
  - [How to build](#how-to-build)
@@ -13,6 +17,7 @@ To learn more about collector types and ODD Platform's architecture, [read the d
 ## Implemented adapters
  - [BigQuery](#bigquery)
  - [BigTable](#bigtable)
+ - [GoogleCloudStorage](#googlecloudstorage)
 
 ### __BigQuery__
 ```yaml
@@ -33,9 +38,20 @@ rows_limit: 10 # get combination of all types in table used across the first N r
 ```yaml
 type: gcs
 name: gcs_adapter
+project: <any_project_name>
 filename_filter: # Optional. Default filter allows each file to be ingested to platform.
   include: [ '.*.parquet' ]
   exclude: [ 'dev_.*' ]
+parameters: # Optional set of parameters, default values presented below.
+  anonymous: bool = False, # Whether to connect anonymously. If True, will not attempt to look up credentials using standard GCP configuration methods.
+  access_token: str = None, # GCP access token. If provided, temporary credentials will be fetched by assuming this role; also, a credential_token_expiration must be specified as well.
+  target_service_account: str = None, # An optional service account to try to impersonate when accessing GCS. This requires the specified credential user or service account to have the necessary permissions.
+  credential_token_expiration: datetime = None, # Datetime in format: "2023-12-31 23:59:59". Expiration for credential generated with an access token. Must be specified if access_token is specified.
+  default_bucket_location: str = "US", # GCP region to create buckets in.
+  scheme: str = "https", # GCS connection transport scheme.
+  endpoint_override: str = None, # Override endpoint with a connect string such as “localhost:9000”
+  default_metadata: mapping or pyarrow.KeyValueMetadata = None, # Default metadata for open_output_stream. This will be ignored if non-empty metadata is passed to open_output_stream.
+  retry_time_limit: timedelta = None, # Timedelta in seconds. Set the maximum amount of time the GCS client will attempt to retry transient errors. Subsecond granularity is ignored.
 datasets:
   # Recursive fetch for all objects in the bucket.
   - bucket: my_bucket
@@ -44,7 +60,7 @@ datasets:
     prefix: folder/subfolder/file.csv
   # When we want to use the folder as a dataset. Very useful for partitioned datasets.
   # I.e it can be Hive partitioned dataset with structure like this:
-  # s3://my_bucket/partitioned_data/year=2019/month=01/...
+  # gs://my_bucket/partitioned_data/year=2019/month=01/...
   - bucket: my_bucket
     prefix: partitioned_data/
     folder_as_dataset:
@@ -52,7 +68,7 @@ datasets:
       flavor: hive
 
   #field_names must be provided if partition flavor was not used. I.e for structure like this:
-  # s3://my_bucket/partitioned_data/year/...
+  # gs://my_bucket/partitioned_data/year/...
   - bucket: my_bucket
     prefix: partitioned_data/
     folder_as_dataset:
