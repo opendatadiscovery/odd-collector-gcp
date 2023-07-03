@@ -22,6 +22,9 @@ The more rows you retrieve the more precise data types are.
 Sample of data source oddrn:
 `projects/open-data-discovery/instances/bigtable/tables/my-table`
 
+#### Note:
+On ODD Platform UI column families are specified along with column name.
+![ui_sample](./screenshots/bigtable_odd_ui.png)
 
 ## Views concept
 In Google Cloud Bigtable, there is no concept of a traditional "view" as you might find in relational databases. 
