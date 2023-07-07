@@ -16,6 +16,7 @@ google-cloud-storage = "^2.10.0"
 google-cloud-bigtable = "^2.19.0"
 pyarrow = "^10.0.1"
 lark-parser = "^0.12.0"
+deltalake = "^0.9.0"
 
 [tool.poetry.dev-dependencies]
 black = "^23.1.0"
