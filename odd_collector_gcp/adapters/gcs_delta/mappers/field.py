@@ -76,6 +76,26 @@ def build_dataset_field(
                 field_name = field_.name
                 field_type = field_.type
                 _build_ds_field_from_type(field_name, field_type, oddrn)
+        elif isinstance(field_type, ArrayType):
+            generated_dataset_fields.append(
+                DataSetField(
+                    oddrn=oddrn,
+                    name=field_name,
+                    metadata=[
+                        extract_metadata(
+                            "delta_table", field, DefinitionType.DATASET_FIELD
+                        )
+                    ],
+                    type=DataSetFieldType(
+                        type=Type.TYPE_LIST,
+                        logical_type=field_type.type,
+                        is_nullable=False,
+                    ),
+                    owner=None,
+                    parent_field_oddrn=parent_oddrn,
+                )
+            )
+            _build_ds_field_from_type("Element", field_type.element_type, oddrn)
         elif isinstance(field_type, MapType):
             generated_dataset_fields.append(
                 DataSetField(
