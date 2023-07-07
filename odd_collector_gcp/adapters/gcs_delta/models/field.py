@@ -15,7 +15,7 @@ class DField:
 
     @property
     def type(self):
-        return self.type
+        return self.field.type
 
     @property
     def nullable(self):

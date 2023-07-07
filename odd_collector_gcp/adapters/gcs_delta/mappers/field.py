@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Union
 
 from deltalake._internal import ArrayType, Field, MapType, PrimitiveType, StructType
 from odd_collector_sdk.utils.metadata import extract_metadata, DefinitionType
@@ -24,6 +24,7 @@ DELTA_TO_ODD_TYPE_MAP: dict[str, Type] = {
     "array": Type.TYPE_LIST,
     "map": Type.TYPE_MAP,
     "int": Type.TYPE_INTEGER,
+    "long": Type.TYPE_INTEGER,
     "string": Type.TYPE_STRING,
     "interval": Type.TYPE_DURATION,
 }
@@ -32,59 +33,6 @@ DELTA_TO_ODD_TYPE_MAP: dict[str, Type] = {
 def map_to_odd_type(delta_type: str) -> Type:
     return DELTA_TO_ODD_TYPE_MAP.get(delta_type, Type.TYPE_UNKNOWN)
 
-
-# def unknown_field(generator: GCSGenerator, field: Field) -> DataSetField:
-#     generator.set_oddrn_paths(columns=field.name)
-#     return DataSetField(
-#         oddrn=generator.get_oddrn_by_path("columns"),
-#         name=field.name,
-#         type=DataSetFieldType(
-#             type=Type.TYPE_UNKNOWN,
-#             logical_type=field.type,
-#             is_nullable=field.nullable,
-#         ),
-#     )
-#
-#
-# def map_primitive(generator: GCSGenerator, field: Field) -> DataSetField:
-#     generator.set_oddrn_paths(columns=field.name)
-#     return DataSetField(
-#         oddrn=generator.get_oddrn_by_path("columns"),
-#         name=field.name,
-#         type=DataSetFieldType(
-#             type=map_to_odd_type(field.type.type),
-#             logical_type=field.type.type,
-#             is_nullable=field.nullable,
-#         ),
-#     )
-#
-#
-# def map_map(generator: GCSGenerator, field: Field) -> DataSetField:
-#     logger.error("Map not implemented yet")
-#
-#
-# def map_struct(generator: GCSGenerator, field: Field) -> DataSetField:
-#     logger.error("Struct not implemented yet")
-#
-#
-# def map_array(generator: GCSGenerator, field: Field) -> DataSetField:
-#     logger.error("Array not implemented yet")
-#
-#
-# def map_field(generator: GCSGenerator, field: Field) -> DataSetField:
-#     type_ = field.type
-#
-#     if isinstance(type_, PrimitiveType):
-#         return map_primitive(generator, field)
-#     elif isinstance(type_, MapType):
-#         return map_struct(generator, field)
-#     elif isinstance(type_, StructType):
-#         return map_map(generator, field)
-#     elif isinstance(type_, ArrayType):
-#         return map_array(generator, field)
-#     else:
-#         logger.error(f"Unknown field type: {field.type}")
-#
 
 def build_dataset_field(
     field: DField, oddrn_generator: GCSGenerator
@@ -124,7 +72,9 @@ def build_dataset_field(
                     parent_field_oddrn=parent_oddrn,
                 )
             )
-            for field_name, field_type in field_type.fields.items():
+            for field_ in field_type.fields:
+                field_name = field_.name
+                field_type = field_.type
                 _build_ds_field_from_type(field_name, field_type, oddrn)
         elif isinstance(field_type, MapType):
             generated_dataset_fields.append(
@@ -175,28 +125,6 @@ def build_dataset_field(
 
     _build_ds_field_from_type(field.name, type_)
     return generated_dataset_fields
-
-
-# def get_logical_type(type_field: Any) -> str:
-#     if isinstance(type_field, PrimitiveType):
-#         return type_field.type
-#     elif isinstance(type_field, ArrayType):
-#         return f"Array({get_logical_type(type_field.type)})"
-#     elif isinstance(type_field, MapType):
-#         return f"Map({get_logical_type(type_field.key_type)}, {get_logical_type(type_field.value_type)})"
-#     elif isinstance(type_field, str):
-#         return type_field
-#     elif isinstance(type_field, StructType):
-#         return (
-#             "Struct("
-#             + ", ".join(
-#                 f"{name}: {get_logical_type(type)}"
-#                 for name, type in type_field.fields.items()
-#             )
-#             + ")"
-#         )
-#     else:
-#         return "Unknown"
 
 
 def get_odd_type(

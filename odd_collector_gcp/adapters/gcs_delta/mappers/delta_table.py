@@ -28,8 +28,5 @@ def map_delta_table(generator: GCSGenerator, delta_table: DTable) -> DataEntity:
         updated_at=delta_table.updated_at,
         owner=None,
         metadata=map_metadata(delta_table),
-        dataset=DataSet(
-            rows_number=delta_table.num_rows,
-            field_list=DataSet(field_list=field_list)
-        ),
+        dataset=DataSet(rows_number=delta_table.num_rows, field_list=field_list),
     )
