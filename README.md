@@ -18,6 +18,7 @@ If not running on Google Cloud Platform (GCP), this generally requires the envir
  - [BigQuery](#bigquery)
  - [BigTable](#bigtable)
  - [GoogleCloudStorage](#googlecloudstorage)
+ - [GoogleCloudStoraDeltaTables](#googlecloudstoragedeltatables)
 
 ### __BigQuery__
 ```yaml
@@ -74,6 +75,27 @@ datasets:
     folder_as_dataset:
       file_format: csv
       field_names: ['year']
+```
+
+### __GoogleCloudStorageDeltaTables__
+```yaml
+type: gcs_delta
+name: gcs_delta_adapter
+project: <any_project_name>
+parameters: # Optional set of parameters, default values presented below.
+  anonymous: bool = False, # Whether to connect anonymously. If True, will not attempt to look up credentials using standard GCP configuration methods.
+  access_token: str = None, # GCP access token. If provided, temporary credentials will be fetched by assuming this role; also, a credential_token_expiration must be specified as well.
+  target_service_account: str = None, # An optional service account to try to impersonate when accessing GCS. This requires the specified credential user or service account to have the necessary permissions.
+  credential_token_expiration: datetime = None, # Datetime in format: "2023-12-31 23:59:59". Expiration for credential generated with an access token. Must be specified if access_token is specified.
+  default_bucket_location: str = "US", # GCP region to create buckets in.
+  scheme: str = "https", # GCS connection transport scheme.
+  endpoint_override: str = None, # Override endpoint with a connect string such as “localhost:9000”
+  default_metadata: mapping or pyarrow.KeyValueMetadata = None, # Default metadata for open_output_stream. This will be ignored if non-empty metadata is passed to open_output_stream.
+  retry_time_limit: timedelta = None, # Timedelta in seconds. Set the maximum amount of time the GCS client will attempt to retry transient errors. Subsecond granularity is ignored.
+delta_tables:
+   # Explicitly specify the prefix to file.
+  - bucket: my_bucket
+    prefix: folder/subfolder/file.csv
 ```
 
 ## How to build
