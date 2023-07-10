@@ -46,8 +46,6 @@ class DeltaTableConfig(BaseModel):
 
 class GCSDeltaPlugin(GcpPlugin):
     type: Literal["gcs_delta"]
-    # endpoint_url: Optional[str]
-    # aws_storage_allow_http: Optional[bool] = False
     parameters: Optional[GCSAdapterParams] = None
     delta_tables: list[DeltaTableConfig]
 
@@ -63,5 +61,5 @@ PLUGIN_FACTORY: PluginFactory = {
     "bigquery_storage": BigQueryStoragePlugin,
     "bigtable": BigTablePlugin,
     "gcs": GCSPlugin,
-    "gcs_delta": GCSDeltaPlugin
+    "gcs_delta": GCSDeltaPlugin,
 }

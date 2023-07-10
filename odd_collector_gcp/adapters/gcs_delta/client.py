@@ -1,9 +1,8 @@
 import traceback as tb
-from dataclasses import asdict, dataclass
 from typing import Any, Iterable, Optional
 
 from deltalake import DeltaTable
-from funcy import complement, isnone, last, partial, select_values, silent, walk
+from funcy import last, partial, silent, walk
 
 from odd_collector_gcp.domain.plugin import DeltaTableConfig, GCSDeltaPlugin
 from odd_collector_gcp.filesystem.pyarrow_fs import FileSystem
@@ -20,37 +19,6 @@ def handle_values(
 ) -> tuple[str, Optional[any]]:
     key, callback = handler
     return key, silent(callback)(obj.get(key))
-
-
-# @dataclass
-# class StorageOptions:
-#     DEFAULT_REGION = "us-east-1"
-#
-#     aws_access_key_id: str = None
-#     aws_secret_access_key: str = None
-#     aws_region: str = None
-#     aws_session_token: str = None
-#     aws_storage_allow_http: str = None
-#     endpoint_url: str = None
-#     aws_profile: str = None
-#     aws_role_session_name: str = None
-#
-#     @classmethod
-#     def from_config(cls, config: S3DeltaPlugin) -> "StorageOptions":
-#         return cls(
-#             aws_access_key_id=config.aws_access_key_id,
-#             aws_secret_access_key=config.aws_secret_access_key,
-#             aws_region=config.aws_region or cls.DEFAULT_REGION,
-#             aws_session_token=config.aws_session_token,
-#             endpoint_url=config.endpoint_url,
-#             aws_storage_allow_http="true" if config.aws_storage_allow_http else None,
-#             aws_profile=config.profile_name,
-#             aws_role_session_name=config.aws_role_session_name,
-#         )
-#
-#     def to_dict(self) -> dict[str, str]:
-#         return select_values(complement(isnone), asdict(self))
-#
 
 
 class IsNotDeltaTable(Exception):
