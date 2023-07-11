@@ -7,12 +7,13 @@ from odd_models.models import (
     DataEntityType,
     DataSet,
     DataSetField,
-    DataSetFieldType,
     Type,
 )
 from oddrn_generator.generators import GCSGenerator
 from oddrn_generator.utils import escape
 from pyarrow import Schema
+
+from .column import map_column
 from ..logger import logger
 
 from .gcs_field_type_transformer import GCSFieldTypeTransformer
@@ -111,95 +112,6 @@ def map_dataset(
         type=DataEntityType.FILE,
         dataset=DataSet(rows_number=gcs_dataset.rows_number, field_list=columns),
     )
-
-
-def map_column(
-    oddrn_gen: GCSGenerator,
-    type_parsed: Dict[str, Any],
-    column_name: str = None,
-    parent_oddrn: str = None,
-    column_description: str = None,
-    stats: DataSetField = None,
-    is_key: bool = None,
-    is_value: bool = None,
-) -> list[DataSetField]:
-    result: list = []
-    ds_type = type_parsed["type"]
-    logical_type = str(type_parsed.get("logical_type", ds_type))
-    name = (
-        column_name
-        if column_name is not None
-        else type_parsed["field_name"]
-        if "field_name" in type_parsed
-        else ds_type
-    )
-
-    resource_name = "keys" if is_key else "values" if is_value else "subcolumns"
-
-    dsf = DataSetField(
-        name=name,
-        oddrn=(
-            oddrn_gen.get_oddrn_by_path("columns", name)
-            if parent_oddrn is None
-            else f"{parent_oddrn}/{resource_name}/{name}"
-        ),
-        parent_field_oddrn=parent_oddrn,
-        type=DataSetFieldType(
-            type=TYPE_MAP.get(
-                ds_type, Type.TYPE_UNKNOWN
-            ),  # TYPE_MAP.get(str(field.type), TYPE_MAP.get(type(field.type), Type.TYPE_UNKNOWN)),
-            logical_type=logical_type,
-            is_nullable=True,
-        ),
-        is_key=bool(is_key),
-        is_value=bool(is_value),
-        owner=None,
-        metadata=[],
-        stats=stats or None,
-        default_value=None,
-        description=column_description,
-    )
-    result.append(dsf)
-
-    if ds_type in ["struct", "union"]:
-        for children in type_parsed["children"]:
-            result.extend(
-                map_column(
-                    oddrn_gen=oddrn_gen, parent_oddrn=dsf.oddrn, type_parsed=children
-                )
-            )
-
-    if ds_type == "list":
-        for children in type_parsed["children"]:
-            result.extend(
-                map_column(
-                    oddrn_gen=oddrn_gen,
-                    parent_oddrn=dsf.oddrn,
-                    type_parsed=children,
-                    is_value=True,
-                )
-            )
-
-    if ds_type == "map":
-        result.extend(
-            map_column(
-                oddrn_gen=oddrn_gen,
-                parent_oddrn=dsf.oddrn,
-                type_parsed=type_parsed["key_type"],
-                is_key=True,
-            )
-        )
-
-        result.extend(
-            map_column(
-                oddrn_gen=oddrn_gen,
-                parent_oddrn=dsf.oddrn,
-                type_parsed=type_parsed["value_type"],
-                is_value=True,
-            )
-        )
-
-    return result
 
 
 def map_columns(schema: Schema, oddrn_gen: GCSGenerator) -> list[DataSetField]:

@@ -15,10 +15,9 @@ def map_delta_table(generator: GCSGenerator, delta_table: DTable) -> DataEntity:
     generator.set_oddrn_paths(buckets=bucket, keys=key)
 
     field_list = []
-    if fields is not None:
-        for field in fields:
-            processed_ds_fields = map_field(generator, field)
-            field_list.extend(processed_ds_fields)
+    for field in fields:
+        processed_ds_fields = map_field(generator, field)
+        field_list.extend(processed_ds_fields)
 
     return DataEntity(
         oddrn=generator.get_oddrn_by_path("keys"),

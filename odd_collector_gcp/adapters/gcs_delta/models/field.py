@@ -1,4 +1,7 @@
+from typing import Union
+
 from deltalake import Field
+from deltalake._internal import PrimitiveType, ArrayType, MapType, StructType
 
 
 class DField:
@@ -6,17 +9,17 @@ class DField:
         self.field = field
 
     @property
-    def odd_metadata(self):
+    def odd_metadata(self) -> dict:
         return self.field.metadata
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self.field.name
 
     @property
-    def type(self):
+    def type(self) -> Union[PrimitiveType, ArrayType, MapType, StructType]:
         return self.field.type
 
     @property
-    def nullable(self):
+    def nullable(self) -> bool:
         return self.nullable

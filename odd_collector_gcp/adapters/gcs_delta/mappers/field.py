@@ -30,10 +30,6 @@ DELTA_TO_ODD_TYPE_MAP: dict[str, Type] = {
 }
 
 
-def map_to_odd_type(delta_type: str) -> Type:
-    return DELTA_TO_ODD_TYPE_MAP.get(delta_type, Type.TYPE_UNKNOWN)
-
-
 def build_dataset_field(
     field: DField, oddrn_generator: GCSGenerator
 ) -> list[DataSetField]:
