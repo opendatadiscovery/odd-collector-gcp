@@ -1,5 +1,3 @@
-from typing import Union
-
 from funcy import lmap, mapcat, partial
 from odd_collector_sdk.domain.adapter import BaseAdapter
 from odd_models.models import DataEntityList
