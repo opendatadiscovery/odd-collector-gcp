@@ -48,7 +48,7 @@ class DeltaClient:
 
         folders = filter(lambda obj: not obj.is_file, objects)
         allowed = filter(lambda folder: folder.base_name, folders)
-        filtered = filter(lambda item: config.allow_prefix(item.path), allowed)
+        filtered = filter(lambda item: config.allow(item.path), allowed)
 
         for obj in filtered:
             new_config = config.append_prefix(obj.base_name)

@@ -45,9 +45,6 @@ class DeltaTableConfig(BaseModel):
     def allow(self, name: str) -> bool:
         return self.object_filter.is_allowed(name)
 
-    def allow_prefix(self, prefix: str) -> bool:
-        return self.prefix_filter.is_prefix_allowed(prefix)
-
 
 class GCSDeltaPlugin(GcpPlugin):
     type: Literal["gcs_delta"]
