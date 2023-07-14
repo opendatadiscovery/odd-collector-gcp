@@ -27,6 +27,7 @@ class DeltaTableConfig(BaseModel):
     bucket: str
     prefix: str
     object_filter: Optional[Filter] = Filter()
+    prefix_filter: Optional[Filter] = Filter()
 
     @property
     def path(self) -> str:
@@ -38,10 +39,14 @@ class DeltaTableConfig(BaseModel):
             bucket=self.bucket,
             prefix=f"{self.prefix}/{path}",
             object_filter=self.object_filter,
+            prefix_filter=self.prefix_filter
         )
 
     def allow(self, name: str) -> bool:
         return self.object_filter.is_allowed(name)
+
+    def allow_prefix(self, prefix: str) -> bool:
+        return self.prefix_filter.is_prefix_allowed(prefix)
 
 
 class GCSDeltaPlugin(GcpPlugin):
