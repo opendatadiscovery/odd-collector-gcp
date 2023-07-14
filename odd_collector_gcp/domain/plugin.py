@@ -39,7 +39,7 @@ class DeltaTableConfig(BaseModel):
             bucket=self.bucket,
             prefix=f"{self.prefix}/{path}",
             object_filter=self.object_filter,
-            prefix_filter=self.prefix_filter
+            prefix_filter=self.prefix_filter,
         )
 
     def allow(self, name: str) -> bool:
