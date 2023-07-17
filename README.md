@@ -67,7 +67,6 @@ datasets:
     folder_as_dataset:
       file_format: parquet
       flavor: hive
-
   #field_names must be provided if partition flavor was not used. I.e for structure like this:
   # gs://my_bucket/partitioned_data/year/...
   - bucket: my_bucket
@@ -92,10 +91,13 @@ parameters: # Optional set of parameters, default values presented below.
   endpoint_override: str = None, # Override endpoint with a connect string such as “localhost:9000”
   default_metadata: mapping or pyarrow.KeyValueMetadata = None, # Default metadata for open_output_stream. This will be ignored if non-empty metadata is passed to open_output_stream.
   retry_time_limit: timedelta = None, # Timedelta in seconds. Set the maximum amount of time the GCS client will attempt to retry transient errors. Subsecond granularity is ignored.
-delta_tables:
-   # Explicitly specify the prefix to file.
-  - bucket: my_bucket
-    prefix: folder/subfolder/file.csv
+delta_tables: # Explicitly specify the bucket and prefix to the file.
+  - bucket: str = "bucket_name"
+    prefix: str = "folder/subfolder/file.csv"
+    prefix_filter: # Optional, default values below
+      include: list[str] = [".*"] # List of patterns to include.
+      exclude: list[str] = None  # List of patterns to exclude
+
 ```
 
 ## How to build
