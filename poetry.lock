@@ -408,6 +408,17 @@ pandas = ["pandas (<2)"]
 pyspark = ["delta-spark", "numpy (==1.22.2)", "pyspark"]
 
 [[package]]
+name = "flatdict"
+version = "4.0.1"
+description = "Python module for interacting with nested dicts as a single level dict with delimited keys."
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "flatdict-4.0.1.tar.gz", hash = "sha256:cd32f08fd31ed21eb09ebc76f06b6bd12046a24f77beb1fd0281917e47f26742"},
+]
+
+[[package]]
 name = "frozenlist"
 version = "1.3.3"
 description = "A list-like structure which implements collections.abc.MutableSequence"
@@ -1127,24 +1138,27 @@ files = [
 
 [[package]]
 name = "odd-collector-sdk"
-version = "0.3.33"
+version = "0.3.40"
 description = "ODD Collector"
 category = "main"
 optional = false
 python-versions = ">=3.9,<4.0"
 files = [
-    {file = "odd_collector_sdk-0.3.33-py3-none-any.whl", hash = "sha256:4194faed8aa61741cca2d5724c30bf86c1f64df7ce4c8718e5edbdba299ada7a"},
-    {file = "odd_collector_sdk-0.3.33.tar.gz", hash = "sha256:6971c4c337db8a119f14d544f379ba7277ddd504c611b5cfa1034705ea2c62e9"},
+    {file = "odd_collector_sdk-0.3.40-py3-none-any.whl", hash = "sha256:da308c2accbfdb29089cf98dba3d73d796592f5c4dcf4cb9239f689b39481f67"},
+    {file = "odd_collector_sdk-0.3.40.tar.gz", hash = "sha256:453461c5fa92e888324ffce0c48eadd9d8c4cfea4528d18412c5e6d74f4ede2c"},
 ]
 
 [package.dependencies]
 aiohttp = ">=3.8.1,<4.0.0"
 APScheduler = ">=3.8.1,<4.0.0"
+flatdict = ">=4.0.1,<5.0.0"
 funcy = ">=2.0,<3.0"
 importlib-metadata = ">=5.1.0,<6.0.0"
+lark-parser = ">=0.12.0,<0.13.0"
 loguru = ">=0.6.0,<0.7.0"
 odd-models = ">=2.0.28,<3.0.0"
 oddrn-generator = ">=0.1.73,<0.2.0"
+prettytable = ">=3.8.0,<4.0.0"
 pyaml-env = ">=1.1.5,<2.0.0"
 pydantic = ">=1.8.2,<2.0.0"
 tqdm = ">=4.64.1,<5.0.0"
@@ -1172,14 +1186,14 @@ sqlparse = "0.4.2"
 
 [[package]]
 name = "oddrn-generator"
-version = "0.1.85"
+version = "0.1.87"
 description = "Open Data Discovery Resource Name Generator"
 category = "main"
 optional = false
 python-versions = ">=3.9,<4.0"
 files = [
-    {file = "oddrn_generator-0.1.85-py3-none-any.whl", hash = "sha256:5aeb5121ed4df6d7e84169c4b2fdc49254994fa349d4237dcd80c6d823ea438c"},
-    {file = "oddrn_generator-0.1.85.tar.gz", hash = "sha256:63285b7a4ba0a6fad4d5091b38890895880be166e445a22151330c78e4afe971"},
+    {file = "oddrn_generator-0.1.87-py3-none-any.whl", hash = "sha256:b904efba2ec8e2b81bf7c6351387c83294da547c797af7c3e06a8033923f8780"},
+    {file = "oddrn_generator-0.1.87.tar.gz", hash = "sha256:3d167c139a554428755bfc7a89cf9086b09e4a4e31ed8a39425bbecc96e0f641"},
 ]
 
 [package.dependencies]
@@ -1240,6 +1254,24 @@ files = [
 [package.extras]
 dev = ["pre-commit", "tox"]
 testing = ["pytest", "pytest-benchmark"]
+
+[[package]]
+name = "prettytable"
+version = "3.8.0"
+description = "A simple Python library for easily displaying tabular data in a visually appealing ASCII table format"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "prettytable-3.8.0-py3-none-any.whl", hash = "sha256:03481bca25ae0c28958c8cd6ac5165c159ce89f7ccde04d5c899b24b68bb13b7"},
+    {file = "prettytable-3.8.0.tar.gz", hash = "sha256:031eae6a9102017e8c7c7906460d150b7ed78b20fd1d8c8be4edaf88556c07ce"},
+]
+
+[package.dependencies]
+wcwidth = "*"
+
+[package.extras]
+tests = ["pytest", "pytest-cov", "pytest-lazy-fixture"]
 
 [[package]]
 name = "proto-plus"
@@ -1730,6 +1762,18 @@ secure = ["certifi", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "ipaddress", "p
 socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
 [[package]]
+name = "wcwidth"
+version = "0.2.6"
+description = "Measures the displayed width of unicode strings in a terminal"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "wcwidth-0.2.6-py2.py3-none-any.whl", hash = "sha256:795b138f6875577cd91bba52baf9e445cd5118fd32723b460e30a0af30ea230e"},
+    {file = "wcwidth-0.2.6.tar.gz", hash = "sha256:a5220780a404dbe3353789870978e472cfe477761f06ee55077256e509b156d0"},
+]
+
+[[package]]
 name = "win32-setctime"
 version = "1.1.0"
 description = "A small Python utility to set file creation time on Windows"
@@ -1851,4 +1895,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "6a28b1e4fe3a109362d56fd7f359b13403893c9cf793d7e98aa439d0abd4b431"
+content-hash = "5efd868a08bf5a829c241f4f36f65e0dbb3d52519a3553bd1a9b3fe63eefefe9"
