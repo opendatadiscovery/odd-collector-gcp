@@ -94,7 +94,7 @@ parameters: # Optional set of parameters, default values presented below.
 delta_tables: # Explicitly specify the bucket and prefix to the file.
   - bucket: str = "bucket_name"
     prefix: str = "folder/subfolder/file.csv"
-    prefix_filter: # Optional, default values below
+    filter: # Optional, default values below
       include: list[str] = [".*"] # List of patterns to include.
       exclude: list[str] = None  # List of patterns to exclude
 
