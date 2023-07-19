@@ -8,8 +8,9 @@ plugins:
     delta_tables:
       - bucket: "odd-bucket-1"
         prefix: "path/to/delta/tables"
-        include: ["some_patterns_to_include"]
-        exclude: ["some_patterns_to_exclude"]
+        filter:
+          include: ["some_patterns_to_include"]
+          exclude: ["some_patterns_to_exclude"]
     parameters: # Optional
       access_token: "token"
       credential_token_expiration: "2023-12-31 23:59:59"
