@@ -4,7 +4,7 @@ from odd_models.models import DataEntityList
 from oddrn_generator.generators import BigQueryStorageGenerator
 
 from odd_collector_gcp.adapters.bigquery_storage.dto import BigQueryDataset
-from odd_collector_gcp.adapters.bigquery_storage.mappers.dataset import map_datasets
+from odd_collector_gcp.adapters.bigquery_storage.mapper import BigQueryStorageMapper
 from odd_collector_gcp.domain.plugin import BigQueryStoragePlugin
 
 
@@ -15,7 +15,7 @@ class Adapter(BaseAdapter):
     def __init__(self, config: BigQueryStoragePlugin):
         super().__init__(config)
         self.client = bigquery.Client(project=config.project)
-        # self.mapper = BigQueryStorageMapper(oddrn_generator=self.generator)
+        self.mapper = BigQueryStorageMapper(oddrn_generator=self.generator)
 
     def create_generator(self) -> BigQueryStorageGenerator:
         return BigQueryStorageGenerator(
@@ -26,9 +26,7 @@ class Adapter(BaseAdapter):
         return self.generator.get_data_source_oddrn()
 
     def get_data_entity_list(self) -> DataEntityList:
-        entities = map_datasets(self.generator, self.__fetch_datasets())
-        datasets = self.__fetch_datasets()
-        # tables = [dataset.tables for dataset in datasets]
+        entities = self.mapper.map_datasets(self.__fetch_datasets())
         return DataEntityList(
             data_source_oddrn=self.get_data_source_oddrn(), items=entities
         )

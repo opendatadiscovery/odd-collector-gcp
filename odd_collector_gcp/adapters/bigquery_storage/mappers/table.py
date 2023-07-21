@@ -5,19 +5,17 @@ from google.cloud.bigquery import SchemaField, Table
 from odd_models import DataEntity, DataEntityType, DataSet, DataSetField
 from oddrn_generator import BigQueryStorageGenerator
 
-from odd_collector_gcp import logger
 from odd_collector_gcp.adapters.bigquery_storage.dto import BQField
-from odd_collector_gcp.adapters.bigquery_storage.mappers.field import map_field
+from odd_collector_gcp.adapters.bigquery_storage.mappers.field import FieldMapper
 
 
 def map_table(oddrn_generator: BigQueryStorageGenerator, table: Table) -> DataEntity:
     oddrn_generator.set_oddrn_paths(tables=table.table_id)
-
-    logger.info(f"SCHEMA: {table.schema}")
+    mapper = FieldMapper(oddrn_generator)
     fields = [BQField(field) for field in table.schema]
     field_list = []
     for field in fields:
-        processed_ds_fields = map_field(oddrn_generator, field)
+        processed_ds_fields = mapper.map_field(field)
         field_list.extend(processed_ds_fields)
 
     return DataEntity(
