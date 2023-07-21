@@ -14,7 +14,10 @@ from odd_models.models import (
 )
 from oddrn_generator import BigQueryStorageGenerator
 
-from odd_collector_gcp.adapters.bigquery_storage.dto import BigQueryDataset, BQField
+from odd_collector_gcp.adapters.bigquery_storage.dto import (
+    BigQueryDataset,
+    BigQueryField,
+)
 
 BIG_QUERY_STORAGE_TYPE_MAPPING = {
     "STRING": Type.TYPE_STRING,
@@ -66,10 +69,11 @@ class BigQueryStorageMapper:
 
     def map_table(self, table: Table) -> DataEntity:
         self.oddrn_generator.set_oddrn_paths(tables=table.table_id)
-        fields = [BQField(field) for field in table.schema]
+        fields = [BigQueryField(field) for field in table.schema]
         field_list = []
         for field in fields:
-            processed_ds_fields = self.map_field(field)
+            field_mapper = FieldMapper(self.oddrn_generator, field)
+            processed_ds_fields = field_mapper.entities
             field_list.extend(processed_ds_fields)
 
         return DataEntity(
@@ -83,41 +87,67 @@ class BigQueryStorageMapper:
             dataset=DataSet(rows_number=table.num_rows, field_list=field_list),
         )
 
-    def map_field(self, field: BQField) -> list[DataSetField]:
-        if field.type == "RECORD":
-            record_field = self.map_simple_field(field)
-            return [
-                self.map_simple_field(f, record_field.oddrn) for f in field.fields
-            ] + [record_field]
-        elif field.mode == "REPEATED":
-            array_field = self.map_simple_field(field)
-            element_field = self.map_simple_field(field, array_field.oddrn, True)
-            return [array_field, element_field]
-        return [self.map_simple_field(field)]
 
-    def map_simple_field(
-        self, field: BQField, parent_oddrn: str = None, array_element: bool = False
-    ) -> DataSetField:
-        field_type = (
-            field.type if field.mode != "REPEATED" or array_element else "ARRAY"
-        )
-        field_name = "Element" if array_element else field.name
+class FieldMapper:
+    def __init__(self, oddrn_generator: BigQueryStorageGenerator, field: BigQueryField):
+        self.oddrn_generator = oddrn_generator
+        self.dataset_fields = []
+        self.map_field(field)
+
+    @property
+    def entities(self) -> list[DataSetField]:
+        return self.dataset_fields
+
+    def map_field(
+        self,
+        field: BigQueryField,
+        parent_oddrn: str = None,
+        is_array_element: bool = False,
+    ):
         if parent_oddrn:
-            oddrn = f"{parent_oddrn}/keys/{field_name}"
+            oddrn = f"{parent_oddrn}/keys/{field.name}"
         else:
-            oddrn = self.oddrn_generator.get_oddrn_by_path("columns", field_name)
+            oddrn = self.oddrn_generator.get_oddrn_by_path("columns", field.name)
 
-        return DataSetField(
-            oddrn=oddrn,
-            name=field_name,
-            description=field.description,
-            parent_field_oddrn=parent_oddrn,
-            metadata=[
-                extract_metadata("bigquery", field, DefinitionType.DATASET_FIELD)
-            ],
-            type=DataSetFieldType(
-                type=BIG_QUERY_STORAGE_TYPE_MAPPING.get(field_type, Type.TYPE_UNKNOWN),
-                logical_type=field_type,
-                is_nullable=field.is_nullable,
-            ),
-        )
+        if field.mode == "REPEATED" and not is_array_element:
+            field_type = "ARRAY"
+            array_field = DataSetField(
+                oddrn=oddrn,
+                name=field.name,
+                description=field.description,
+                parent_field_oddrn=parent_oddrn,
+                metadata=[
+                    extract_metadata("bigquery", field, DefinitionType.DATASET_FIELD)
+                ],
+                type=DataSetFieldType(
+                    type=BIG_QUERY_STORAGE_TYPE_MAPPING.get(
+                        field_type, Type.TYPE_UNKNOWN
+                    ),
+                    logical_type=field_type,
+                    is_nullable=field.is_nullable,
+                ),
+            )
+            self.dataset_fields.append(array_field)
+            self.map_field(field, oddrn, True)
+        else:
+            field_name = "Element" if is_array_element else field.name
+            field_entity = DataSetField(
+                oddrn=oddrn,
+                name=field_name,
+                description=field.description,
+                parent_field_oddrn=parent_oddrn,
+                metadata=[
+                    extract_metadata("bigquery", field, DefinitionType.DATASET_FIELD)
+                ],
+                type=DataSetFieldType(
+                    type=BIG_QUERY_STORAGE_TYPE_MAPPING.get(
+                        field.type, Type.TYPE_UNKNOWN
+                    ),
+                    logical_type=field.type,
+                    is_nullable=field.is_nullable,
+                ),
+            )
+            self.dataset_fields.append(field_entity)
+            if field.type == "RECORD":
+                for f in field.fields:
+                    self.map_field(f, field_entity.oddrn)

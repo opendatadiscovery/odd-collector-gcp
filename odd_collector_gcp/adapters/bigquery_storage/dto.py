@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 from google.cloud.bigquery import Dataset, SchemaField, Table
+from odd_collector_sdk.utils.metadata import HasMetadata
 
 
 @dataclass
@@ -9,7 +10,7 @@ class BigQueryDataset:
     tables: list[Table]
 
 
-class BQField:
+class BigQueryField(HasMetadata):
     def __init__(self, field: SchemaField):
         self.field = field
 
@@ -33,7 +34,7 @@ class BQField:
 
     @property
     def fields(self) -> list:
-        return [BQField(field) for field in self.field.fields]
+        return [BigQueryField(field) for field in self.field.fields]
 
     @property
     def description(self) -> str:
