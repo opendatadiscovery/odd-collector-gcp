@@ -73,7 +73,7 @@ class BigQueryStorageMapper:
         field_list = []
         for field in fields:
             field_mapper = FieldMapper(self.oddrn_generator, field)
-            processed_ds_fields = field_mapper.entities
+            processed_ds_fields = field_mapper.dataset_fields
             field_list.extend(processed_ds_fields)
 
         return DataEntity(
@@ -93,10 +93,6 @@ class FieldMapper:
         self.oddrn_generator = oddrn_generator
         self.dataset_fields = []
         self.map_field(field)
-
-    @property
-    def entities(self) -> list[DataSetField]:
-        return self.dataset_fields
 
     def map_field(
         self,
