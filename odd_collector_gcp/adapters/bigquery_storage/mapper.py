@@ -1,57 +1,61 @@
 from functools import reduce
 from operator import iconcat
-from typing import List
 
-from google.cloud.bigquery import Table, SchemaField
+from google.cloud.bigquery import Table
+from odd_collector_sdk.utils.metadata import DefinitionType, extract_metadata
 from odd_models.models import (
     DataEntity,
-    DataEntityType,
     DataEntityGroup,
+    DataEntityType,
     DataSet,
     DataSetField,
     DataSetFieldType,
     Type,
-    DataSetFieldStat,
-    StringFieldStat,
+)
+from oddrn_generator import BigQueryStorageGenerator
+
+from odd_collector_gcp.adapters.bigquery_storage.dto import (
+    BigQueryDataset,
+    BigQueryField,
 )
 
-from odd_collector_gcp.adapters.bigquery_storage.dto import BigQueryDataset
-from odd_collector_gcp.adapters.bigquery_storage.generator import (
-    BigQueryStorageGenerator,
-)
-
-# Keys are lowercased so that it'd be easy to perform a case-insensitive lookup
-_BIG_QUERY_STORAGE_TYPE_MAPPING = {
-    "string": Type.TYPE_STRING,
-    "bytes": Type.TYPE_BINARY,
-    "integer": Type.TYPE_INTEGER,
-    "float": Type.TYPE_NUMBER,
-    "numeric": Type.TYPE_NUMBER,
-    "bignumeric": Type.TYPE_NUMBER,
-    "boolean": Type.TYPE_BOOLEAN,
-    "timestamp": Type.TYPE_DATETIME,
-    "date": Type.TYPE_DATETIME,
-    "time": Type.TYPE_TIME,
-    "datetime": Type.TYPE_DATETIME,
-    "record": Type.TYPE_STRUCT,
+BIG_QUERY_STORAGE_TYPE_MAPPING = {
+    "STRING": Type.TYPE_STRING,
+    "BYTES": Type.TYPE_BINARY,
+    "INT64": Type.TYPE_INTEGER,
+    "INTEGER": Type.TYPE_INTEGER,
+    "FLOAT64": Type.TYPE_NUMBER,
+    "FLOAT": Type.TYPE_NUMBER,
+    "NUMERIC": Type.TYPE_NUMBER,
+    "BIGNUMERIC": Type.TYPE_NUMBER,
+    "BOOLEAN": Type.TYPE_BOOLEAN,
+    "BOOL": Type.TYPE_BOOLEAN,
+    "TIMESTAMP": Type.TYPE_DATETIME,
+    "DATE": Type.TYPE_DATETIME,
+    "TIME": Type.TYPE_TIME,
+    "DATETIME": Type.TYPE_DATETIME,
+    "GEOGRAPHY": Type.TYPE_UNKNOWN,
+    "ARRAY": Type.TYPE_LIST,
+    "STRUCT": Type.TYPE_STRUCT,
+    "RECORD": Type.TYPE_STRUCT,
 }
 
 
 class BigQueryStorageMapper:
     def __init__(self, oddrn_generator: BigQueryStorageGenerator):
-        self.__oddrn_generator = oddrn_generator
+        self.oddrn_generator = oddrn_generator
 
-    def map_datasets(self, datasets: List[BigQueryDataset]) -> List[DataEntity]:
+    def map_datasets(self, datasets: list[BigQueryDataset]) -> list[DataEntity]:
         return reduce(iconcat, [self.map_dataset(d) for d in datasets], [])
 
-    def map_dataset(self, dataset_dto: BigQueryDataset) -> List[DataEntity]:
+    def map_dataset(self, dataset_dto: BigQueryDataset) -> list[DataEntity]:
         dataset = dataset_dto.dataset
-        self.__oddrn_generator.set_oddrn_paths(datasets=dataset.dataset_id)
+        self.oddrn_generator.set_oddrn_paths(datasets=dataset.dataset_id)
 
         tables = [self.map_table(t) for t in dataset_dto.tables]
 
         database_service_deg = DataEntity(
-            oddrn=self.__oddrn_generator.get_oddrn_by_path("datasets"),
+            oddrn=self.oddrn_generator.get_oddrn_by_path("datasets"),
             name=dataset.dataset_id,
             description=dataset.description,
             metadata=[],
@@ -64,54 +68,82 @@ class BigQueryStorageMapper:
         return tables + [database_service_deg]
 
     def map_table(self, table: Table) -> DataEntity:
-        self.__oddrn_generator.set_oddrn_paths(tables=table.table_id)
+        self.oddrn_generator.set_oddrn_paths(tables=table.table_id)
+        fields = [BigQueryField(field) for field in table.schema]
+        field_list = []
+        for field in fields:
+            field_mapper = FieldMapper(self.oddrn_generator, field)
+            processed_ds_fields = field_mapper.dataset_fields
+            field_list.extend(processed_ds_fields)
 
         return DataEntity(
-            oddrn=self.__oddrn_generator.get_oddrn_by_path("tables"),
+            oddrn=self.oddrn_generator.get_oddrn_by_path("tables"),
             name=table.table_id,
             description=table.description,
             metadata=[],
             created_at=table.created,
             updated_at=table.modified,
             type=DataEntityType.TABLE,
-            dataset=DataSet(
-                rows_number=table.num_rows, field_list=self.map_schema(table.schema)
-            ),
+            dataset=DataSet(rows_number=table.num_rows, field_list=field_list),
         )
 
-    def map_schema(self, schema: SchemaField) -> List[DataSetField]:
-        if isinstance(schema, list):
-            return reduce(iconcat, [self.map_field(f) for f in schema], [])
 
-        return reduce(iconcat, [self.map_field(f) for f in schema.fields], [])
+class FieldMapper:
+    def __init__(self, oddrn_generator: BigQueryStorageGenerator, field: BigQueryField):
+        self.oddrn_generator = oddrn_generator
+        self.dataset_fields = []
+        self.map_field(field)
 
-    def map_field(self, field: SchemaField) -> List[DataSetField]:
-        if field.field_type == "RECORD":
-            record_field = self.map_simple_field(field)
-            return [
-                self.map_simple_field(f, record_field.oddrn) for f in field.fields
-            ] + [record_field]
+    def map_field(
+        self,
+        field: BigQueryField,
+        parent_oddrn: str = None,
+        is_array_element: bool = False,
+    ):
+        if parent_oddrn:
+            oddrn = f"{parent_oddrn}/keys/{field.name}"
+        else:
+            oddrn = self.oddrn_generator.get_oddrn_by_path("columns", field.name)
 
-        return [self.map_simple_field(field)]
-
-    def map_simple_field(
-        self, field_schema: SchemaField, parent_oddrn: str = None
-    ) -> DataSetField:
-        field = DataSetField(
-            oddrn=self.__oddrn_generator.get_oddrn_by_path(
-                "columns", field_schema.name
-            ),
-            name=field_schema.name,
-            description=field_schema.description,
-            parent_field_oddrn=parent_oddrn,
-            metadata=[],
-            type=DataSetFieldType(
-                type=_BIG_QUERY_STORAGE_TYPE_MAPPING.get(
-                    field_schema.field_type.lower(), Type.TYPE_UNKNOWN
+        if field.mode == "REPEATED" and not is_array_element:
+            field_type = "ARRAY"
+            array_field = DataSetField(
+                oddrn=oddrn,
+                name=field.name,
+                description=field.description,
+                parent_field_oddrn=parent_oddrn,
+                metadata=[
+                    extract_metadata("bigquery", field, DefinitionType.DATASET_FIELD)
+                ],
+                type=DataSetFieldType(
+                    type=BIG_QUERY_STORAGE_TYPE_MAPPING.get(
+                        field_type, Type.TYPE_UNKNOWN
+                    ),
+                    logical_type=field_type,
+                    is_nullable=field.is_nullable,
                 ),
-                logical_type=field_schema.field_type,
-                is_nullable=field_schema.is_nullable,
-            ),
-        )
-
-        return field
+            )
+            self.dataset_fields.append(array_field)
+            self.map_field(field, oddrn, True)
+        else:
+            field_name = "Element" if is_array_element else field.name
+            field_entity = DataSetField(
+                oddrn=oddrn,
+                name=field_name,
+                description=field.description,
+                parent_field_oddrn=parent_oddrn,
+                metadata=[
+                    extract_metadata("bigquery", field, DefinitionType.DATASET_FIELD)
+                ],
+                type=DataSetFieldType(
+                    type=BIG_QUERY_STORAGE_TYPE_MAPPING.get(
+                        field.type, Type.TYPE_UNKNOWN
+                    ),
+                    logical_type=field.type,
+                    is_nullable=field.is_nullable,
+                ),
+            )
+            self.dataset_fields.append(field_entity)
+            if field.type == "RECORD":
+                for f in field.fields:
+                    self.map_field(f, field_entity.oddrn)
