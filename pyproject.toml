@@ -9,7 +9,7 @@ repository = "https://github.com/opendatadiscovery/odd-collector-gcp"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-oddrn-generator = "^0.1.87"
+oddrn-generator = "^0.1.92"
 odd-collector-sdk = "^0.3.40"
 google-cloud-bigquery = "^3.1.0"
 google-cloud-storage = "^2.10.0"

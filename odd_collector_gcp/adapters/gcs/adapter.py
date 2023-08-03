@@ -5,7 +5,9 @@ from odd_collector_sdk.domain.adapter import BaseAdapter
 from odd_models.models import DataEntityList
 from oddrn_generator import Generator
 from oddrn_generator.generators import GCSGenerator
+
 from odd_collector_gcp.domain.plugin import GCSPlugin
+
 from .file_system import FileSystem
 from .logger import logger
 from .mapper.bucket import map_bucket
