@@ -1,7 +1,7 @@
 from typing import Literal, Optional
 
-from odd_collector_sdk.domain.plugin import Plugin
 from odd_collector_sdk.domain.filter import Filter
+from odd_collector_sdk.domain.plugin import Plugin
 from odd_collector_sdk.types import PluginFactory
 from pydantic import BaseModel, Field
 
@@ -15,6 +15,7 @@ class GcpPlugin(Plugin):
 
 class BigQueryStoragePlugin(GcpPlugin):
     type: Literal["bigquery_storage"]
+    page_size: Optional[int] = 100
 
 
 class BigTablePlugin(GcpPlugin):
