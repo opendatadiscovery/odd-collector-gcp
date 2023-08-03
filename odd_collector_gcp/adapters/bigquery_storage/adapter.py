@@ -7,6 +7,8 @@ from odd_collector_gcp.adapters.bigquery_storage.dto import BigQueryDataset
 from odd_collector_gcp.adapters.bigquery_storage.mapper import BigQueryStorageMapper
 from odd_collector_gcp.domain.plugin import BigQueryStoragePlugin
 
+SDK_DATASET_MAX_RESULTS = 100
+
 
 class Adapter(BaseAdapter):
     config: BigQueryStoragePlugin
@@ -33,11 +35,20 @@ class Adapter(BaseAdapter):
 
     def __fetch_datasets(self) -> list[BigQueryDataset]:
         datasets = []
-        for dr in self.client.list_datasets():
-            dataset = BigQueryDataset(
-                dataset=self.client.get_dataset(dr.dataset_id),
-                tables=[self.client.get_table(t) for t in self.client.list_tables(dr)],
-            )
-            datasets.append(dataset)
+        datasets_iterator = self.client.list_datasets(page_size=SDK_DATASET_MAX_RESULTS)
+        for datasets_page in datasets_iterator.pages:
+            for dr in datasets_page:
+                tables_iterator = self.client.list_tables(
+                    dr, page_size=SDK_DATASET_MAX_RESULTS
+                )
+                dataset = BigQueryDataset(
+                    dataset=self.client.get_dataset(dr.dataset_id),
+                    tables=[
+                        self.client.get_table(t)
+                        for tables_page in tables_iterator.pages
+                        for t in tables_page
+                    ],
+                )
+                datasets.append(dataset)
 
         return datasets
