@@ -40,7 +40,7 @@ class Adapter(BaseAdapter):
                     dr, page_size=self.config.page_size
                 )
                 dataset = BigQueryDataset(
-                    dataset=self.client.get_dataset(dr.dataset_id),
+                    data_object=self.client.get_dataset(dr.dataset_id),
                     tables=[
                         self.client.get_table(t)
                         for tables_page in tables_iterator.pages
