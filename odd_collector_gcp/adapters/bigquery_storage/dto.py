@@ -1,49 +1,56 @@
 from dataclasses import dataclass
+from typing import Any
 
 from google.cloud.bigquery import Dataset, SchemaField, Table
 from odd_collector_sdk.utils.metadata import HasMetadata
 
-
-@dataclass
-class BigQueryDataset:
-    dataset: Dataset
-    tables: list[Table]
+from odd_collector_gcp.utils.get_properties import get_properties
 
 
-class BigQueryField(HasMetadata):
-    def __init__(self, field: SchemaField):
-        self.field = field
+class MetadataMixin:
+    data_object: Any
+    excluded_properties = []
 
     @property
     def odd_metadata(self) -> dict:
-        return {
-            "mode": self.field.mode,
-            "policy_tags": self.field.policy_tags,
-            "precision": self.field.precision,
-            "scale": self.field.scale,
-            "max_length": self.field.max_length,
-        }
+        return get_properties(self.data_object, self.excluded_properties)
 
-    @property
-    def name(self) -> str:
-        return self.field.name
 
-    @property
-    def type(self) -> str:
-        return self.field.field_type
+@dataclass
+class BigQueryDataset(MetadataMixin, HasMetadata):
+    data_object: Dataset
+    tables: list[Table]
+    excluded_properties = [
+        "reference",
+        "description",
+        "dataset_id",
+        "created",
+        "updated",
+        "access_entries",
+    ]
 
-    @property
-    def fields(self) -> list:
-        return [BigQueryField(field) for field in self.field.fields]
 
-    @property
-    def description(self) -> str:
-        return self.field.description
+@dataclass
+class BigQueryTable(MetadataMixin, HasMetadata):
+    data_object: Table
+    excluded_properties = [
+        "reference",
+        "schema",
+        "num_rows",
+        "description",
+        "table_id",
+        "created",
+        "updated",
+    ]
 
-    @property
-    def is_nullable(self) -> bool:
-        return self.field.is_nullable
 
-    @property
-    def mode(self) -> str:
-        return self.field.mode
+@dataclass
+class BigQueryField(MetadataMixin, HasMetadata):
+    data_object: SchemaField
+    excluded_properties = [
+        "name",
+        "field_type",
+        "fields",
+        "description",
+        "is_nullable",
+    ]

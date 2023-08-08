@@ -1,7 +1,6 @@
 from functools import reduce
 from operator import iconcat
 
-from google.cloud.bigquery import Table
 from odd_collector_sdk.utils.metadata import DefinitionType, extract_metadata
 from odd_models.models import (
     DataEntity,
@@ -17,6 +16,7 @@ from oddrn_generator import BigQueryStorageGenerator
 from odd_collector_gcp.adapters.bigquery_storage.dto import (
     BigQueryDataset,
     BigQueryField,
+    BigQueryTable,
 )
 
 BIG_QUERY_STORAGE_TYPE_MAPPING = {
@@ -49,16 +49,18 @@ class BigQueryStorageMapper:
         return reduce(iconcat, [self.map_dataset(d) for d in datasets], [])
 
     def map_dataset(self, dataset_dto: BigQueryDataset) -> list[DataEntity]:
-        dataset = dataset_dto.dataset
+        dataset = dataset_dto.data_object
         self.oddrn_generator.set_oddrn_paths(datasets=dataset.dataset_id)
 
-        tables = [self.map_table(t) for t in dataset_dto.tables]
+        tables = [self.map_table(BigQueryTable(t)) for t in dataset_dto.tables]
 
         database_service_deg = DataEntity(
             oddrn=self.oddrn_generator.get_oddrn_by_path("datasets"),
             name=dataset.dataset_id,
             description=dataset.description,
-            metadata=[],
+            metadata=[
+                extract_metadata("bigquery", dataset_dto, DefinitionType.DATASET)
+            ],
             created_at=dataset.created,
             updated_at=dataset.modified,
             type=DataEntityType.DATABASE_SERVICE,
@@ -67,7 +69,8 @@ class BigQueryStorageMapper:
 
         return tables + [database_service_deg]
 
-    def map_table(self, table: Table) -> DataEntity:
+    def map_table(self, table_dto: BigQueryTable) -> DataEntity:
+        table = table_dto.data_object
         self.oddrn_generator.set_oddrn_paths(tables=table.table_id)
         fields = [BigQueryField(field) for field in table.schema]
         field_list = []
@@ -80,7 +83,7 @@ class BigQueryStorageMapper:
             oddrn=self.oddrn_generator.get_oddrn_by_path("tables"),
             name=table.table_id,
             description=table.description,
-            metadata=[],
+            metadata=[extract_metadata("bigquery", table_dto, DefinitionType.DATASET)],
             created_at=table.created,
             updated_at=table.modified,
             type=DataEntityType.TABLE,
@@ -89,17 +92,20 @@ class BigQueryStorageMapper:
 
 
 class FieldMapper:
-    def __init__(self, oddrn_generator: BigQueryStorageGenerator, field: BigQueryField):
+    def __init__(
+        self, oddrn_generator: BigQueryStorageGenerator, field_dto: BigQueryField
+    ):
         self.oddrn_generator = oddrn_generator
         self.dataset_fields = []
-        self.map_field(field)
+        self.map_field(field_dto)
 
     def map_field(
         self,
-        field: BigQueryField,
+        field_dto: BigQueryField,
         parent_oddrn: str = None,
         is_array_element: bool = False,
     ):
+        field = field_dto.data_object
         if parent_oddrn:
             oddrn = f"{parent_oddrn}/keys/{field.name}"
         else:
@@ -113,7 +119,9 @@ class FieldMapper:
                 description=field.description,
                 parent_field_oddrn=parent_oddrn,
                 metadata=[
-                    extract_metadata("bigquery", field, DefinitionType.DATASET_FIELD)
+                    extract_metadata(
+                        "bigquery", field_dto, DefinitionType.DATASET_FIELD
+                    )
                 ],
                 type=DataSetFieldType(
                     type=BIG_QUERY_STORAGE_TYPE_MAPPING.get(
@@ -124,7 +132,7 @@ class FieldMapper:
                 ),
             )
             self.dataset_fields.append(array_field)
-            self.map_field(field, oddrn, True)
+            self.map_field(BigQueryField(field), oddrn, True)
         else:
             field_name = "Element" if is_array_element else field.name
             field_entity = DataSetField(
@@ -133,17 +141,19 @@ class FieldMapper:
                 description=field.description,
                 parent_field_oddrn=parent_oddrn,
                 metadata=[
-                    extract_metadata("bigquery", field, DefinitionType.DATASET_FIELD)
+                    extract_metadata(
+                        "bigquery", field_dto, DefinitionType.DATASET_FIELD
+                    )
                 ],
                 type=DataSetFieldType(
                     type=BIG_QUERY_STORAGE_TYPE_MAPPING.get(
-                        field.type, Type.TYPE_UNKNOWN
+                        field.field_type, Type.TYPE_UNKNOWN
                     ),
-                    logical_type=field.type,
+                    logical_type=field.field_type,
                     is_nullable=field.is_nullable,
                 ),
             )
             self.dataset_fields.append(field_entity)
-            if field.type == "RECORD":
+            if field.field_type == "RECORD":
                 for f in field.fields:
-                    self.map_field(f, field_entity.oddrn)
+                    self.map_field(BigQueryField(f), field_entity.oddrn)
