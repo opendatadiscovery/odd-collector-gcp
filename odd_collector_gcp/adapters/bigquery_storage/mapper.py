@@ -3,7 +3,20 @@ from datetime import datetime
 from functools import reduce
 from operator import iconcat
 
-from google.cloud.bigquery import ExternalConfig, ParquetOptions, TimePartitioning
+from google.cloud.bigquery import (
+    AvroOptions,
+    BigtableColumn,
+    BigtableColumnFamily,
+    BigtableOptions,
+    CSVOptions,
+    ExternalConfig,
+    ExternalSourceFormat,
+    GoogleSheetsOptions,
+    HivePartitioningOptions,
+    ParquetOptions,
+    RangePartitioning,
+    TimePartitioning,
+)
 from odd_collector_sdk.utils.metadata import DefinitionType, extract_metadata
 from odd_models.models import (
     DataEntity,
@@ -175,6 +188,22 @@ class BigQueryMetadataEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, datetime):
             return obj.isoformat()
-        if isinstance(obj, (ExternalConfig, ParquetOptions, TimePartitioning)):
+        if isinstance(
+            obj,
+            (
+                ExternalConfig,
+                ParquetOptions,
+                TimePartitioning,
+                AvroOptions,
+                RangePartitioning,
+                BigtableOptions,
+                BigtableColumnFamily,
+                BigtableColumn,
+                CSVOptions,
+                GoogleSheetsOptions,
+                ExternalSourceFormat,
+                HivePartitioningOptions,
+            ),
+        ):
             return get_properties(obj)
         return super().default(obj)
