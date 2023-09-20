@@ -2,7 +2,7 @@ name: ODD Collector GCP release
 
 on:
   release:
-    types: [published]
+    types: [ published ]
 
 env:
   REGISTRY: ghcr.io
@@ -36,3 +36,20 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Patch package version
+        run: |
+          poetry version patch
+          echo "VERSION = \"$(poetry version -s)\"" > odd_collector_gcp/__version__.py
+
+
+      - name: Update repository with up-to-date and version
+        run: |
+          git config --global user.email "opendatadiscovery-bot@provectus.com"
+          git config --global user.name "OpenDataDiscovery Bot"
+          if [ -n "$(git status --porcelain)" ]
+          then
+            git add .
+            git commit -m "Bump package version"
+            git push origin main
+          fi
