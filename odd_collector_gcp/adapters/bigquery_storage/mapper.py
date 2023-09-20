@@ -93,7 +93,7 @@ class BigQueryStorageMapper:
                     DefinitionType.DATASET,
                     flatten=True,
                     jsonify=True,
-                    json_encoder=MetadataEncoder,
+                    json_encoder=BigQueryMetadataEncoder,
                 )
             ],
             created_at=table.created,
@@ -171,7 +171,7 @@ class FieldMapper:
                     self.map_field(BigQueryField(f), field_entity.oddrn)
 
 
-class MetadataEncoder(json.JSONEncoder):
+class BigQueryMetadataEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, datetime):
             return obj.isoformat()
