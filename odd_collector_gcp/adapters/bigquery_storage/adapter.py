@@ -36,7 +36,7 @@ class Adapter(BaseAdapter):
         datasets_iterator = self.client.list_datasets(page_size=self.config.page_size)
         for datasets_page in datasets_iterator.pages:
             for dr in datasets_page:
-                if dr.dataset_id in self.config.datasets or not self.config.datasets:
+                if self.config.datasets_filter.is_allowed(dr.dataset_id):
                     tables_iterator = self.client.list_tables(
                         dr, page_size=self.config.page_size
                     )

@@ -25,7 +25,9 @@ If not running on Google Cloud Platform (GCP), this generally requires the envir
 type: bigquery_storage
 name: bigquery_storage
 project: <any_project_name>
-datasets: [<datasets_names>] # Optional list of datasets to fetch, if not provided all datasets will be fetched
+datasets_filter: # Optional, if not provided all datasets from the project will be included
+  include: [ <patterns_to_include> ] # List of dataset name patterns to include
+  exclude: [ <patterns_to_exclude> ] # List of dataset name patterns to exclude
 ```
 
 ### __BigTable__
