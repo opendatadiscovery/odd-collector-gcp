@@ -36,17 +36,18 @@ class Adapter(BaseAdapter):
         datasets_iterator = self.client.list_datasets(page_size=self.config.page_size)
         for datasets_page in datasets_iterator.pages:
             for dr in datasets_page:
-                tables_iterator = self.client.list_tables(
-                    dr, page_size=self.config.page_size
-                )
-                dataset = BigQueryDataset(
-                    data_object=self.client.get_dataset(dr.dataset_id),
-                    tables=[
-                        self.client.get_table(t)
-                        for tables_page in tables_iterator.pages
-                        for t in tables_page
-                    ],
-                )
-                datasets.append(dataset)
+                if dr.dataset_id in self.config.datasets or not self.config.datasets:
+                    tables_iterator = self.client.list_tables(
+                        dr, page_size=self.config.page_size
+                    )
+                    dataset = BigQueryDataset(
+                        data_object=self.client.get_dataset(dr.dataset_id),
+                        tables=[
+                            self.client.get_table(t)
+                            for tables_page in tables_iterator.pages
+                            for t in tables_page
+                        ],
+                    )
+                    datasets.append(dataset)
 
         return datasets
