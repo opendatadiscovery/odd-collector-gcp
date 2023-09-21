@@ -5,6 +5,6 @@ plugins:
   - type: bigquery_storage
     name: bigquery_storage_adapter
     project: project_name
-    datasets_filter: # Optional, if not provided all datasets from the project will be included
+    datasets_filter: # Optional, if not provided all datasets from the project will be fetched
       include: [ patterns_to_include ] # Dataset name patterns to include
       exclude: [ patterns_to_exclude ] # Dataset name patterns to exclude
