@@ -1,5 +1,5 @@
 default_pulling_interval: 10
-token: "B28sfRmkntxf6YJdIwvN6urB7i7riiMbeEjJCGYY"
+token: "**TOKEN**"
 platform_host_url: "http://localhost:8080"
 plugins:
   - type: bigquery_storage
