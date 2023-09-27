@@ -37,6 +37,20 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
+  commit_version:
+    name: 'Commit project version to github'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          poetry-version: 1.3.2
+          virtualenvs-create: false
+
       - name: Patch package version
         run: |
           poetry version patch
